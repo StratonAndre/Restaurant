@@ -24,6 +24,83 @@ namespace RestaurantManager.Services
             _configurationService = configurationService;
         }
 
+        // Helper method to map a DataRow to an Order object
+        // FIXED: Map StatusName column to Status.Name property
+        private Order MapOrderFromDataRow(DataRow row)
+        {
+            var order = new Order
+            {
+                OrderId = Convert.ToInt32(row["OrderID"]),
+                OrderCode = row["OrderCode"].ToString(),
+                UserId = Convert.ToInt32(row["UserID"]),
+                OrderDate = Convert.ToDateTime(row["OrderDate"]),
+                EstimatedDeliveryTime = Convert.ToDateTime(row["EstimatedDeliveryTime"]),
+                StatusId = Convert.ToInt32(row["StatusID"]),
+                FoodCost = Convert.ToDecimal(row["FoodCost"]),
+                DeliveryCost = Convert.ToDecimal(row["DeliveryCost"]),
+                DiscountAmount = Convert.ToDecimal(row["DiscountAmount"]),
+                TotalCost = Convert.ToDecimal(row["TotalCost"])
+            };
+
+            // Include status information if available
+            if (row.Table.Columns.Contains("StatusName") && row["StatusName"] != DBNull.Value)
+            {
+                order.Status = new OrderStatus
+                {
+                    StatusId = order.StatusId,
+                    Name = row["StatusName"].ToString()  // Map StatusName column to Name property
+                };
+            }
+
+            // Include user information if available
+            if (row.Table.Columns.Contains("FirstName") && row.Table.Columns.Contains("LastName"))
+            {
+                order.User = new User
+                {
+                    UserId = order.UserId,
+                    FirstName = row["FirstName"].ToString(),
+                    LastName = row["LastName"].ToString(),
+                    Email = row.Table.Columns.Contains("Email") ? row["Email"].ToString() : string.Empty,
+                    PhoneNumber = row.Table.Columns.Contains("PhoneNumber") ? row["PhoneNumber"].ToString() : string.Empty,
+                    DeliveryAddress = row.Table.Columns.Contains("DeliveryAddress") ? row["DeliveryAddress"].ToString() : string.Empty
+                };
+            }
+
+            return order;
+        }
+
+        // Map order detail from DataRow - also handles dish/menu names
+        private OrderDetail MapOrderDetailFromDataRow(DataRow row)
+        {
+            var detail = new OrderDetail
+            {
+                OrderDetailId = Convert.ToInt32(row["OrderDetailID"]),
+                OrderId = Convert.ToInt32(row["OrderID"]),
+                DishId = row["DishID"] != DBNull.Value ? Convert.ToInt32(row["DishID"]) : (int?)null,
+                MenuId = row["MenuID"] != DBNull.Value ? Convert.ToInt32(row["MenuID"]) : (int?)null,
+                Quantity = Convert.ToInt32(row["Quantity"]),
+                UnitPrice = Convert.ToDecimal(row["UnitPrice"])
+            };
+
+            // Map item names if available
+            if (row.Table.Columns.Contains("DishName") && detail.DishId.HasValue && row["DishName"] != DBNull.Value)
+            {
+                detail.ItemName = row["DishName"].ToString();
+            }
+            else if (row.Table.Columns.Contains("MenuName") && detail.MenuId.HasValue && row["MenuName"] != DBNull.Value)
+            {
+                detail.ItemName = row["MenuName"].ToString();
+            }
+
+            // Set item type if available
+            if (row.Table.Columns.Contains("ItemType"))
+            {
+                detail.ItemType = row["ItemType"].ToString();
+            }
+
+            return detail;
+        }
+
         // Place a new order
         public async Task<Order> PlaceOrderAsync(Order order)
         {
@@ -85,8 +162,8 @@ namespace RestaurantManager.Services
                 var parameters = new Dictionary<string, object>
                 {
                     { "OrderId", detail.OrderId },
-                    { "DishId", detail.DishId },
-                    { "MenuId", detail.MenuId },
+                    { "DishId", detail.DishId ?? (object)DBNull.Value },
+                    { "MenuId", detail.MenuId ?? (object)DBNull.Value },
                     { "Quantity", detail.Quantity },
                     { "UnitPrice", detail.UnitPrice }
                 };
@@ -276,15 +353,7 @@ namespace RestaurantManager.Services
                     
                     foreach (DataRow row in result.Tables[1].Rows)
                     {
-                        var detail = new OrderDetail
-                        {
-                            OrderDetailId = Convert.ToInt32(row["OrderDetailId"]),
-                            OrderId = Convert.ToInt32(row["OrderId"]),
-                            DishId = row["DishId"] != DBNull.Value ? Convert.ToInt32(row["DishId"]) : (int?)null,
-                            MenuId = row["MenuId"] != DBNull.Value ? Convert.ToInt32(row["MenuId"]) : (int?)null,
-                            Quantity = Convert.ToInt32(row["Quantity"]),
-                            UnitPrice = Convert.ToDecimal(row["UnitPrice"])
-                        };
+                        var detail = MapOrderDetailFromDataRow(row);
                         
                         // Load the dish or menu
                         if (detail.DishId.HasValue)
@@ -331,15 +400,7 @@ namespace RestaurantManager.Services
                     // Second table contains order details
                     foreach (DataRow row in result.Tables[1].Rows)
                     {
-                        var detail = new OrderDetail
-                        {
-                            OrderDetailId = Convert.ToInt32(row["OrderDetailId"]),
-                            OrderId = Convert.ToInt32(row["OrderId"]),
-                            DishId = row["DishId"] != DBNull.Value ? Convert.ToInt32(row["DishId"]) : (int?)null,
-                            MenuId = row["MenuId"] != DBNull.Value ? Convert.ToInt32(row["MenuId"]) : (int?)null,
-                            Quantity = Convert.ToInt32(row["Quantity"]),
-                            UnitPrice = Convert.ToDecimal(row["UnitPrice"])
-                        };
+                        var detail = MapOrderDetailFromDataRow(row);
                         
                         // Load the dish or menu
                         if (detail.DishId.HasValue)
@@ -368,39 +429,6 @@ namespace RestaurantManager.Services
         private string GenerateOrderCode()
         {
             return $"ORD-{DateTime.Now:yyyyMMdd}-{new Random().Next(1000, 9999)}";
-        }
-
-        // Helper method to map a DataRow to an Order object
-        private Order MapOrderFromDataRow(DataRow row)
-        {
-            return new Order
-            {
-                OrderId = Convert.ToInt32(row["OrderId"]),
-                OrderCode = row["OrderCode"].ToString(),
-                UserId = Convert.ToInt32(row["UserId"]),
-                OrderDate = Convert.ToDateTime(row["OrderDate"]),
-                EstimatedDeliveryTime = Convert.ToDateTime(row["EstimatedDeliveryTime"]),
-                StatusId = Convert.ToInt32(row["StatusId"]),
-                Status = new OrderStatus
-                {
-                    StatusId = Convert.ToInt32(row["StatusId"]),
-                    StatusName = row["StatusName"].ToString()
-                },
-                FoodCost = Convert.ToDecimal(row["FoodCost"]),
-                DeliveryCost = Convert.ToDecimal(row["DeliveryCost"]),
-                DiscountAmount = Convert.ToDecimal(row["DiscountAmount"]),
-                TotalCost = Convert.ToDecimal(row["TotalCost"]),
-                User = row.Table.Columns.Contains("FirstName") && row.Table.Columns.Contains("LastName") ? 
-                    new User
-                    {
-                        UserId = Convert.ToInt32(row["UserId"]),
-                        FirstName = row["FirstName"].ToString(),
-                        LastName = row["LastName"].ToString(),
-                        Email = row["Email"].ToString(),
-                        PhoneNumber = row["PhoneNumber"].ToString(),
-                        DeliveryAddress = row["DeliveryAddress"].ToString()
-                    } : null
-            };
         }
 
         // Get orders by status

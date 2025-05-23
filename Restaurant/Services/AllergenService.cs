@@ -75,8 +75,7 @@ namespace RestaurantManager.Services
             {
                 var parameters = new Dictionary<string, object>
                 {
-                    { "Name", allergen.Name },
-                    { "Description", allergen.Description }
+                    { "Name", allergen.Name }  // Stored proc expects @Name
                 };
 
                 var outputParameters = new Dictionary<string, SqlDbType>
@@ -109,8 +108,7 @@ namespace RestaurantManager.Services
                 var parameters = new Dictionary<string, object>
                 {
                     { "AllergenId", allergen.AllergenId },
-                    { "Name", allergen.Name },
-                    { "Description", allergen.Description }
+                    { "Name", allergen.Name }  // Stored proc expects @Name
                 };
 
                 int rowsAffected = await _databaseService.ExecuteNonQueryAsync("sp_UpdateAllergen", parameters);
@@ -221,13 +219,14 @@ namespace RestaurantManager.Services
         }
 
         // Helper method to map a DataRow to an Allergen object
+        // FIXED: Map AllergenName column to Name property
         private Allergen MapAllergenFromDataRow(DataRow row)
         {
             return new Allergen
             {
-                AllergenId = Convert.ToInt32(row["AllergenId"]),
-                Name = row["Name"].ToString(),
-                Description = row["Description"].ToString()
+                AllergenId = Convert.ToInt32(row["AllergenID"]),
+                Name = row["AllergenName"].ToString(),  // Map AllergenName column to Name property
+                Description = row.Table.Columns.Contains("Description") ? row["Description"]?.ToString() : string.Empty
             };
         }
     }

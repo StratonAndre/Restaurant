@@ -134,8 +134,8 @@ namespace RestaurantManager.Services
                 var parameters = new Dictionary<string, object>
                 {
                     { "CategoryId", dish.CategoryId },
-                    { "Name", dish.Name },
-                    { "Description", dish.Description },
+                    { "Name", dish.Name },  // Stored proc expects @Name
+                    { "Description", dish.Description ?? string.Empty },
                     { "PortionSize", dish.PortionSize },
                     { "Price", dish.Price },
                     { "TotalQuantity", dish.TotalQuantity },
@@ -173,8 +173,8 @@ namespace RestaurantManager.Services
                 {
                     { "DishId", dish.Id },
                     { "CategoryId", dish.CategoryId },
-                    { "Name", dish.Name },
-                    { "Description", dish.Description },
+                    { "Name", dish.Name },  // Stored proc expects @Name
+                    { "Description", dish.Description ?? string.Empty },
                     { "PortionSize", dish.PortionSize },
                     { "Price", dish.Price },
                     { "TotalQuantity", dish.TotalQuantity },
@@ -232,6 +232,15 @@ namespace RestaurantManager.Services
                     foreach (DataRow row in result.Tables[0].Rows)
                     {
                         var dish = MapDishFromDataRow(row);
+                        // Include category name if available
+                        if (row.Table.Columns.Contains("CategoryName") && row["CategoryName"] != DBNull.Value)
+                        {
+                            dish.Category = new Category 
+                            { 
+                                CategoryId = dish.CategoryId, 
+                                Name = row["CategoryName"].ToString() 
+                            };
+                        }
                         dishes.Add(dish);
                     }
                 }
@@ -264,6 +273,16 @@ namespace RestaurantManager.Services
                     foreach (DataRow row in result.Tables[0].Rows)
                     {
                         var dish = MapDishFromDataRow(row);
+                        
+                        // Include category name if available
+                        if (row.Table.Columns.Contains("CategoryName") && row["CategoryName"] != DBNull.Value)
+                        {
+                            dish.Category = new Category 
+                            { 
+                                CategoryId = dish.CategoryId, 
+                                Name = row["CategoryName"].ToString() 
+                            };
+                        }
                         
                         // Get allergens for this dish
                         dish.Allergens = await _allergenService.GetAllergensForDishAsync(dish.Id);
@@ -304,8 +323,8 @@ namespace RestaurantManager.Services
                     {
                         images.Add(new DishImage
                         {
-                            ImageId = Convert.ToInt32(row["ImageId"]),
-                            DishId = Convert.ToInt32(row["DishId"]),
+                            ImageId = Convert.ToInt32(row["ImageID"]),
+                            DishId = Convert.ToInt32(row["DishID"]),
                             ImagePath = row["ImagePath"].ToString()
                         });
                     }
@@ -375,19 +394,37 @@ namespace RestaurantManager.Services
         }
 
         // Helper method to map a DataRow to a Dish object
+        // FIXED: Map database columns to C# properties correctly
         private Dish MapDishFromDataRow(DataRow row)
         {
-            return new Dish
+            var dish = new Dish
             {
-                Id = Convert.ToInt32(row["DishId"]),
-                Name = row["Name"].ToString(),
-                Description = row["Description"].ToString(),
-                CategoryId = Convert.ToInt32(row["CategoryId"]),
-                PortionSize = Convert.ToInt32(row["PortionSize"]),
+                Id = Convert.ToInt32(row["DishID"]),
+                Name = row["DishName"].ToString(),  // Map DishName column to Name property
+                CategoryId = Convert.ToInt32(row["CategoryID"]),
+                PortionSize = Convert.ToInt32(row["PortionQuantity"]),  // Map PortionQuantity to PortionSize
                 Price = Convert.ToDecimal(row["Price"]),
-                TotalQuantity = Convert.ToDecimal(row["TotalQuantity"]),
-                IsAvailable = Convert.ToBoolean(row["IsAvailable"])
+                TotalQuantity = Convert.ToDecimal(row["TotalQuantity"])
             };
+
+            // Handle optional columns that may not exist in all queries
+            if (row.Table.Columns.Contains("Description"))
+            {
+                dish.Description = row["Description"]?.ToString();
+            }
+
+            // Handle IsAvailable - if column doesn't exist, determine by TotalQuantity
+            if (row.Table.Columns.Contains("IsAvailable"))
+            {
+                dish.IsAvailable = Convert.ToBoolean(row["IsAvailable"]);
+            }
+            else
+            {
+                // Dish is available if TotalQuantity > 0
+                dish.IsAvailable = dish.TotalQuantity > 0;
+            }
+
+            return dish;
         }
 
         // Search dishes by criteria (from the partial class)
@@ -397,8 +434,8 @@ namespace RestaurantManager.Services
             {
                 var parameters = new Dictionary<string, object>
                 {
-                    { "Keyword", keyword },
-                    { "AllergenId", allergenId },
+                    { "Keyword", keyword ?? (object)DBNull.Value },
+                    { "AllergenId", allergenId ?? (object)DBNull.Value },
                     { "ExcludeAllergen", excludeAllergen }
                 };
 

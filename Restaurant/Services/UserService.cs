@@ -232,24 +232,32 @@ namespace RestaurantManager.Services
         }
 
         // Helper method to map a DataRow to a User object
+        // FIXED: Map RoleName column to Role.Name property
         private User MapUserFromDataRow(DataRow row)
         {
-            return new User
+            var user = new User
             {
-                UserId = Convert.ToInt32(row["UserId"]),
+                UserId = Convert.ToInt32(row["UserID"]),
                 FirstName = row["FirstName"].ToString(),
                 LastName = row["LastName"].ToString(),
                 Email = row["Email"].ToString(),
                 PhoneNumber = row["PhoneNumber"].ToString(),
                 DeliveryAddress = row["DeliveryAddress"].ToString(),
                 PasswordHash = row["PasswordHash"].ToString(),
-                RoleId = Convert.ToInt32(row["RoleId"]),
-                Role = new UserRole
-                {
-                    RoleId = Convert.ToInt32(row["RoleId"]),
-                    RoleName = row["RoleName"].ToString()
-                }
+                RoleId = Convert.ToInt32(row["RoleID"])
             };
+
+            // Include role information if available
+            if (row.Table.Columns.Contains("RoleName") && row["RoleName"] != DBNull.Value)
+            {
+                user.Role = new UserRole
+                {
+                    RoleId = user.RoleId,
+                    Name = row["RoleName"].ToString()  // Map RoleName column to Name property
+                };
+            }
+
+            return user;
         }
     }
 }

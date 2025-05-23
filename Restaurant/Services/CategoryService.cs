@@ -75,8 +75,8 @@ namespace RestaurantManager.Services
             {
                 var parameters = new Dictionary<string, object>
                 {
-                    { "Name", category.Name },
-                    { "Description", category.Description }
+                    { "Name", category.Name },  // Stored proc expects @Name
+                    { "Description", category.Description ?? string.Empty }
                 };
 
                 var outputParameters = new Dictionary<string, SqlDbType>
@@ -109,8 +109,8 @@ namespace RestaurantManager.Services
                 var parameters = new Dictionary<string, object>
                 {
                     { "CategoryId", category.CategoryId },
-                    { "Name", category.Name },
-                    { "Description", category.Description }
+                    { "Name", category.Name },  // Stored proc expects @Name
+                    { "Description", category.Description ?? string.Empty }
                 };
 
                 int rowsAffected = await _databaseService.ExecuteNonQueryAsync("sp_UpdateCategory", parameters);
@@ -146,13 +146,14 @@ namespace RestaurantManager.Services
         }
 
         // Helper method to map a DataRow to a Category object
+        // FIXED: Map CategoryName column to Name property
         private Category MapCategoryFromDataRow(DataRow row)
         {
             return new Category
             {
-                CategoryId = Convert.ToInt32(row["CategoryId"]),
-                Name = row["Name"].ToString(),
-                Description = row["Description"].ToString()
+                CategoryId = Convert.ToInt32(row["CategoryID"]),
+                Name = row["CategoryName"].ToString(),  // Map CategoryName column to Name property
+                Description = row.Table.Columns.Contains("Description") ? row["Description"]?.ToString() : string.Empty
             };
         }
     }

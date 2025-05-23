@@ -133,3 +133,5 @@ C:\Users\Admin\Desktop\Restaurant\Restaurant\obj\Debug\net9.0-windows\refint\Res
 C:\Users\Admin\Desktop\Restaurant\Restaurant\obj\Debug\net9.0-windows\RestaurantManager.pdb
 C:\Users\Admin\Desktop\Restaurant\Restaurant\obj\Debug\net9.0-windows\Restaurant.genruntimeconfig.cache
 C:\Users\Admin\Desktop\Restaurant\Restaurant\obj\Debug\net9.0-windows\ref\RestaurantManager.dll
+C:\Users\Admin\Desktop\Restaurant\Restaurant\obj\Debug\net9.0-windows\Views\CustomerOrdersView.baml
+C:\Users\Admin\Desktop\Restaurant\Restaurant\obj\Debug\net9.0-windows\Views\CustomerOrdersView.g.cs

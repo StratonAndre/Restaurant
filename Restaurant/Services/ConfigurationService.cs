@@ -33,10 +33,10 @@ namespace RestaurantManager.Services
                     {
                         var setting = new AppSetting
                         {
-                            SettingId = Convert.ToInt32(row["SettingId"]),
-                            SettingKey = row["SettingKey"].ToString(),
+                            SettingId = Convert.ToInt32(row["SettingID"]),
+                            SettingKey = row["SettingName"].ToString(),  // Map SettingName column to SettingKey property
                             SettingValue = row["SettingValue"].ToString(),
-                            Description = row["Description"].ToString()
+                            Description = row.Table.Columns.Contains("Description") ? row["Description"]?.ToString() : string.Empty
                         };
                         
                         _settings[setting.SettingKey] = setting;
@@ -95,7 +95,7 @@ namespace RestaurantManager.Services
             {
                 var parameters = new Dictionary<string, object>
                 {
-                    { "SettingKey", key },
+                    { "SettingName", key },  // Stored proc expects @SettingName
                     { "SettingValue", value }
                 };
 
