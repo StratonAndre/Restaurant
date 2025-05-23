@@ -1191,11 +1191,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Admin\\Documents\\Restaurant\\Restaurant\\Restaurant.csproj",
+      "projectUniqueName": "C:\\Users\\Admin\\Desktop\\Restaurant\\Restaurant\\Restaurant.csproj",
       "projectName": "RestaurantManager",
-      "projectPath": "C:\\Users\\Admin\\Documents\\Restaurant\\Restaurant\\Restaurant.csproj",
+      "projectPath": "C:\\Users\\Admin\\Desktop\\Restaurant\\Restaurant\\Restaurant.csproj",
       "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Admin\\Documents\\Restaurant\\Restaurant\\obj\\",
+      "outputPath": "C:\\Users\\Admin\\Desktop\\Restaurant\\Restaurant\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config"
