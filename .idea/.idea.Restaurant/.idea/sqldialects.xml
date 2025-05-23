@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/CreateDatabase.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/SeedData.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/AllergenProcedures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/CategoryProcedures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/DishProcedures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/EssentialStoredProcesures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/MenuProcedures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/OrderProcedures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/ReportProcedures.sql" dialect="TSQL" />
+    <file url="file://$PROJECT_DIR$/Restaurant/Database/StoredProcedures/UserProcedures.sql" dialect="TSQL" />
+  </component>
+</project>

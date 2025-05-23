@@ -1,0 +1,182 @@
+<UserControl x:Class="RestaurantManager.Views.MenuView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RestaurantManager.Views"
+        xmlns:vm="clr-namespace:RestaurantManager.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MenuViewModel}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        
+        <!-- Page Title -->
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                   Text="{Binding Title}" 
+                   Style="{StaticResource PageTitle}"
+                   Margin="10,10,10,5"/>
+        
+        <!-- Categories List -->
+        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource CardPanel}" Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock Grid.Row="0" Text="Categories" 
+                           Style="{StaticResource SectionTitle}" 
+                           Margin="0,0,0,10"/>
+                
+                <ListBox Grid.Row="1" 
+                         ItemsSource="{Binding Categories}" 
+                         SelectedItem="{Binding SelectedCategory}"
+                         DisplayMemberPath="Name"
+                         BorderThickness="0"
+                         Background="Transparent"/>
+            </Grid>
+        </Border>
+        
+        <!-- Menu Items for Selected Category -->
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Section Title -->
+            <TextBlock Grid.Row="0" Text="{Binding SelectedCategory.Name, StringFormat='Menu Items - \{0\}'}" 
+                       Style="{StaticResource SectionTitle}" 
+                       Margin="10,10,10,5"/>
+            
+            <!-- Menu Items -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding MenuItems}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource CardPanel}" Width="300" Margin="5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <!-- Item Name -->
+                                    <TextBlock Grid.Row="0" Text="{Binding Name}" 
+                                               FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
+                                    
+                                    <!-- Item Image (if available) -->
+                                    <Border Grid.Row="1" Margin="0,5"
+                                            Visibility="{Binding Images.Count, Converter={StaticResource NumberToVisibilityConverter}}">
+                                        <Image Source="{Binding Images[0].ImagePath}" 
+                                               Height="120" Stretch="Uniform"/>
+                                    </Border>
+                                    
+                                    <!-- Portion Size & Price -->
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,5">
+                                        <TextBlock Text="Portion Size: "/>
+                                        <TextBlock Text="{Binding PortionSize, StringFormat=\{0\}g}"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Price -->
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,5">
+                                        <TextBlock Text="Price: "/>
+                                        <TextBlock Text="{Binding Price, Converter={StaticResource PriceConverter}}" 
+                                                   FontWeight="SemiBold"/>
+                                    </StackPanel>
+                                    
+                                    <!-- Allergens -->
+                                    <StackPanel Grid.Row="4" Orientation="Vertical" Margin="0,5"
+                                                Visibility="{Binding Allergens.Count, Converter={StaticResource NumberToVisibilityConverter}}">
+                                        <TextBlock Text="Allergens:" FontWeight="SemiBold"/>
+                                        <ItemsControl ItemsSource="{Binding Allergens}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Border Background="#FFF0F0F0" Margin="2" Padding="4,2" CornerRadius="3">
+                                                        <TextBlock Text="{Binding Name}" FontSize="11"/>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                    
+                                    <!-- Availability and Add to Cart -->
+                                    <Grid Grid.Row="5" Margin="0,10,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Availability -->
+                                        <TextBlock Grid.Column="0" Text="Out of Stock" 
+                                                   Foreground="Red" FontWeight="Bold"
+                                                   VerticalAlignment="Center"
+                                                   Visibility="{Binding IsAvailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                        
+                                        <!-- Add to Cart Button (only for clients) -->
+                                        <Button Grid.Column="1" Content="Add to Cart" 
+                                                Visibility="{Binding DataContext.IsClient, RelativeSource={RelativeSource AncestorType=ItemsControl}, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                Command="{Binding DataContext.AddToCartCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                IsEnabled="{Binding IsAvailable}"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <!-- Empty State Message -->
+            <TextBlock Grid.Row="1" 
+                       Text="Select a category to view menu items" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Foreground="#999999"
+                       FontSize="16"
+                       Visibility="{Binding MenuItems.Count, Converter={StaticResource NumberToVisibilityConverter}, ConverterParameter=inverse}"/>
+            
+            <!-- Loading Indicator -->
+            <Border Grid.Row="1" 
+                    Background="#80FFFFFF" 
+                    Visibility="{Binding IsLoadingData, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="Loading..." FontSize="18" HorizontalAlignment="Center"/>
+                    <ProgressBar IsIndeterminate="True" Width="200" Height="10" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+        
+        <!-- Error Message -->
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
+                Background="#FFEFE0E0" BorderBrush="#FFCC0000" BorderThickness="1" CornerRadius="4"
+                Padding="10" Margin="10"
+                VerticalAlignment="Top" HorizontalAlignment="Center"
+                Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}">
+            <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFCC0000" TextWrapping="Wrap"/>
+        </Border>
+    </Grid>
+</UserControl>

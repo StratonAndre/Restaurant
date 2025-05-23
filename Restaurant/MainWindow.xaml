@@ -1,0 +1,128 @@
+﻿<Window x:Class="RestaurantManager.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RestaurantManager.Views"
+        xmlns:vm="clr-namespace:RestaurantManager.ViewModels"
+        xmlns:converters="clr-namespace:RestaurantManager.Utilities.Converters"
+        mc:Ignorable="d"
+        Title="{Binding Title}" 
+        Height="750" 
+        Width="1200"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+        <converters:NumberToVisibilityConverter x:Key="NumberToVisibilityConverter"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header/Navigation Bar -->
+        <Grid Grid.Row="0" Background="#2E3137">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- Restaurant Logo and Name -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10">
+                <TextBlock Text="🍽️" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="White"/>
+                <TextBlock Text="Restaurant Manager" VerticalAlignment="Center" 
+                           FontSize="20" FontWeight="Bold" Foreground="White"/>
+            </StackPanel>
+            
+            <!-- Navigation Menu -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" 
+                        Visibility="{Binding IsMenuVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <!-- Available to all users -->
+                <Button Content="Menu" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Menu"/>
+                <Button Content="Search" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Search"/>
+                
+                <!-- Only for authenticated users -->
+                <Button Content="My Orders" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="CustomerOrders"
+                        Visibility="{Binding IsClient, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="My Profile" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="CustomerProfile"
+                        Visibility="{Binding IsClient, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                
+                <!-- Only for employees -->
+                <Button Content="Dashboard" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="AdminDashboard"
+                        Visibility="{Binding IsEmployee, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Categories" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="CategoryManagement"
+                        Visibility="{Binding IsEmployee, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Dishes" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="DishManagement"
+                        Visibility="{Binding IsEmployee, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Menus" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="MenuManagement"
+                        Visibility="{Binding IsEmployee, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Allergens" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="AllergenManagement"
+                        Visibility="{Binding IsEmployee, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Orders" Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="OrderManagement"
+                        Visibility="{Binding IsEmployee, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            </StackPanel>
+            
+            <!-- User Info and Login/Cart -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="10">
+                <!-- Shopping Cart (only for clients) -->
+                <Button Margin="5" Padding="10,5" 
+                        Command="{Binding NavigateCommand}" CommandParameter="Cart"
+                        Visibility="{Binding IsClient, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="🛒" FontSize="14" VerticalAlignment="Center"/>
+                        <TextBlock Text="Cart" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                        <Border Background="Red" CornerRadius="10" Margin="5,0,0,0" 
+                                Visibility="{Binding CartItemCount, Converter={StaticResource NumberToVisibilityConverter}}">
+                            <TextBlock Text="{Binding CartItemCount}" Foreground="White" 
+                                       Margin="5,2" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
+                </Button>
+                
+                <!-- User info or Login/Register -->
+                <StackPanel Orientation="Horizontal" Margin="5">
+                    <!-- For authenticated users -->
+                    <StackPanel Orientation="Horizontal" 
+                                Visibility="{Binding IsUserAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="👤" FontSize="14" VerticalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="{Binding CurrentUser.FullName}" VerticalAlignment="Center" Margin="5,0" Foreground="White"/>
+                        <Button Content="Logout" Margin="5,0,0,0" Padding="10,5" Command="{Binding LogoutCommand}"/>
+                    </StackPanel>
+                    
+                    <!-- For anonymous users -->
+                    <StackPanel Orientation="Horizontal" 
+                                Visibility="{Binding IsUserAuthenticated, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <Button Content="Login" Margin="0" Padding="10,5" 
+                                Command="{Binding NavigateCommand}" CommandParameter="Login"/>
+                        <Button Content="Register" Margin="5,0,0,0" Padding="10,5" 
+                                Command="{Binding NavigateCommand}" CommandParameter="Register"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Main Content Area -->
+        <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" Margin="10"/>
+        
+        <!-- Footer -->
+        <StatusBar Grid.Row="2" Background="#2E3137">
+            <TextBlock Text="© 2025 Restaurant Manager - WPF MVVM Application" Foreground="White" Margin="10,5"/>
+        </StatusBar>
+    </Grid>
+</Window>
