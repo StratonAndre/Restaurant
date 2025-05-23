@@ -38,6 +38,20 @@ namespace RestaurantManager.Models
                 {
                     _roleName = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(Name)); // Notify Name property changed too
+                }
+            }
+        }
+
+        // Add Name property for compatibility with mapping/service code
+        public string Name
+        {
+            get => RoleName;
+            set
+            {
+                if (RoleName != value)
+                {
+                    RoleName = value; // This will also raise PropertyChanged for Name
                 }
             }
         }

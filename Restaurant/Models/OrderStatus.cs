@@ -49,9 +49,18 @@ namespace RestaurantManager.Models
         public int StatusId { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the status.
+        /// Gets or sets the name of the status (DB column: StatusName).
         /// </summary>
         public string StatusName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name (for compatibility with mapping code).
+        /// </summary>
+        public string Name
+        {
+            get => StatusName;
+            set => StatusName = value;
+        }
 
         /// <summary>
         /// Gets a value indicating whether this status represents an active order.

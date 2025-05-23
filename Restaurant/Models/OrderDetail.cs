@@ -18,6 +18,9 @@ namespace RestaurantManager.Models
         private Dish _dish;
         private Menu _menu;
 
+        private string _itemName;
+        private string _itemType;
+
         /// <summary>
         /// Gets or sets the order detail ID.
         /// </summary>
@@ -94,7 +97,6 @@ namespace RestaurantManager.Models
                 {
                     _quantity = value;
                     OnPropertyChanged();
-                    // Also notify that LineTotal has changed
                     OnPropertyChanged(nameof(LineTotal));
                 }
             }
@@ -112,7 +114,6 @@ namespace RestaurantManager.Models
                 {
                     _unitPrice = value;
                     OnPropertyChanged();
-                    // Also notify that LineTotal has changed
                     OnPropertyChanged(nameof(LineTotal));
                 }
             }
@@ -147,16 +148,14 @@ namespace RestaurantManager.Models
                 {
                     _dish = value;
                     DishId = value?.Id;
-                    
+
                     if (value != null)
                     {
-                        // If setting a dish, clear the menu
                         MenuId = null;
                         Menu = null;
-                        // Update the unit price
                         UnitPrice = value.Price;
                     }
-                    
+
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(ItemName));
                     OnPropertyChanged(nameof(ItemType));
@@ -177,16 +176,14 @@ namespace RestaurantManager.Models
                 {
                     _menu = value;
                     MenuId = value?.Id;
-                    
+
                     if (value != null)
                     {
-                        // If setting a menu, clear the dish
                         DishId = null;
                         Dish = null;
-                        // Update the unit price
                         UnitPrice = value.Price;
                     }
-                    
+
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(ItemName));
                     OnPropertyChanged(nameof(ItemType));
@@ -196,19 +193,41 @@ namespace RestaurantManager.Models
         }
 
         /// <summary>
+        /// Gets or sets the item name (for DB mapping).
+        /// </summary>
+        public string ItemName
+        {
+            get => _itemName ?? Dish?.Name ?? Menu?.Name ?? "Unknown Item";
+            set
+            {
+                if (_itemName != value)
+                {
+                    _itemName = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the item type (for DB mapping).
+        /// </summary>
+        public string ItemType
+        {
+            get => _itemType ?? (Dish != null ? "Dish" : (Menu != null ? "Menu" : "Unknown"));
+            set
+            {
+                if (_itemType != value)
+                {
+                    _itemType = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the total price for this line item.
         /// </summary>
         public decimal LineTotal => Quantity * UnitPrice;
-
-        /// <summary>
-        /// Gets the name of the item (dish or menu).
-        /// </summary>
-        public string ItemName => Dish?.Name ?? Menu?.Name ?? "Unknown Item";
-
-        /// <summary>
-        /// Gets the type of the item ("Dish" or "Menu").
-        /// </summary>
-        public string ItemType => Dish != null ? "Dish" : (Menu != null ? "Menu" : "Unknown");
 
         /// <summary>
         /// Gets the menu item (dish or menu).
